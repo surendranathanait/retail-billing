@@ -24,14 +24,12 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-# Copy composer files
-COPY composer.json composer.lock* ./
+# Copy application files first
+COPY . .
 
 # Install PHP dependencies
-RUN composer install --no-dev --no-interaction --prefer-dist
-
-# Copy application files
-COPY . .
+RUN composer install --no-dev --no-interaction --prefer-dist --no-scripts && \
+    composer dump-autoload --no-dev --optimize
 
 # Copy frontend build
 COPY --from=frontend-builder /app/public/build ./public/build
