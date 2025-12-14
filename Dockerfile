@@ -25,10 +25,14 @@ RUN apk add --no-cache \
     libzip-dev \
     libpng-dev \
     libjpeg-turbo-dev \
-    freetype-dev
+    freetype-dev \
+    libwebp-dev
 
 # Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype=/usr/include --with-jpeg=/usr/include && \
+RUN docker-php-ext-configure gd \
+      --with-freetype \
+      --with-jpeg \
+      --with-webp && \
     docker-php-ext-install \
     pdo \
     pdo_mysql \
