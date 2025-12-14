@@ -25,7 +25,7 @@ RUN apk add --no-cache \
     libzip-dev \
     libpng-dev \
     libjpeg-turbo-dev \
-    libfreetype6-dev
+    freetype-dev
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
