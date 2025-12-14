@@ -102,17 +102,23 @@ class BillingController extends Controller
         try {
             $invoice->load(['customer', 'items.product']);
             
-            // Generate PDF with proper options
-            $pdf = \PDF::loadView('billing.pdf', compact('invoice'))
-                ->setPaper('a4')
-                ->setOption('isHtml5ParserEnabled', true)
-                ->setOption('enable_remote', true)
-                ->setOption('allow_url_fopen', true);
-            
-            return $pdf->download('invoice-' . $invoice->invoice_number . '.pdf');
+            // Try using Barryvdh PDF
+            try {
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('billing.pdf', ['invoice' => $invoice]);
+                return $pdf->download('invoice-' . $invoice->invoice_number . '.pdf');
+            } catch (\Exception $pdfError) {
+                // Fallback: Generate HTML invoice for download
+                \Log::warning('PDF generation failed, using HTML fallback: ' . $pdfError->getMessage());
+                
+                $html = view('billing.pdf', ['invoice' => $invoice])->render();
+                
+                return response($html)
+                    ->header('Content-Type', 'text/html; charset=utf-8')
+                    ->header('Content-Disposition', 'attachment; filename="invoice-' . $invoice->invoice_number . '.html"');
+            }
         } catch (\Exception $e) {
-            \Log::error('PDF Generation Error: ' . $e->getMessage());
-            return back()->with('error', 'Failed to generate PDF. Please try again.');
+            \Log::error('Invoice download error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to generate invoice: ' . substr($e->getMessage(), 0, 100));
         }
     }
 

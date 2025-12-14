@@ -341,11 +341,11 @@
                         <tr>
                             <td><span class="code">{{ $item->product->product_code }}</span></td>
                             <td>{{ $item->product->name }}</td>
-                            <td class="amount">₹{{ number_format($item->unit_price, 2) }}</td>
+                            <td class="amount">Rs. {{ number_format($item->unit_price, 2) }}</td>
                             <td class="amount">{{ $item->quantity }}</td>
-                            <td class="amount">₹{{ number_format($item->purchase_price, 2) }}</td>
+                            <td class="amount">Rs. {{ number_format($item->purchase_price, 2) }}</td>
                             <td class="amount">{{ number_format($item->tax_percent, 2) }}%</td>
-                            <td class="amount total-amount">₹{{ number_format($item->total, 2) }}</td>
+                            <td class="amount total-amount">Rs. {{ number_format($item->total, 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -358,36 +358,36 @@
                 <div class="summary-box">
                     <div class="summary-row">
                         <span class="summary-label">Subtotal:</span>
-                        <span class="summary-value">₹{{ number_format($invoice->subtotal, 2) }}</span>
+                        <span class="summary-value">Rs. {{ number_format($invoice->subtotal, 2) }}</span>
                     </div>
                     <div class="summary-row">
                         <span class="summary-label">Total Tax:</span>
-                        <span class="summary-value">₹{{ number_format($invoice->tax_total, 2) }}</span>
+                        <span class="summary-value">Rs. {{ number_format($invoice->tax_total, 2) }}</span>
                     </div>
                     <div class="summary-row">
                         <span class="summary-label">Grand Total:</span>
-                        <span class="summary-value">₹{{ number_format($invoice->grand_total, 2) }}</span>
+                        <span class="summary-value">Rs. {{ number_format($invoice->grand_total, 2) }}</span>
                     </div>
                     <div class="summary-row">
                         <span class="summary-label">Rounding:</span>
-                        <span class="summary-value">₹{{ number_format($invoice->rounded_total - $invoice->grand_total, 2) }}</span>
+                        <span class="summary-value">Rs. {{ number_format($invoice->rounded_total - $invoice->grand_total, 2) }}</span>
                     </div>
                 </div>
 
                 <div class="total-box">
                     <span class="summary-label">Amount to Pay:</span>
-                    <span class="summary-value">₹{{ number_format($invoice->rounded_total, 2) }}</span>
+                    <span class="summary-value">Rs. {{ number_format($invoice->rounded_total, 2) }}</span>
                 </div>
 
                 <div class="payment-box">
                     <div class="payment-row">
                         <span class="label">Amount Paid:</span>
-                        <span class="amount">₹{{ number_format($invoice->amount_paid, 2) }}</span>
+                        <span class="amount">Rs. {{ number_format($invoice->amount_paid, 2) }}</span>
                     </div>
                     @if($invoice->balance_returned > 0)
                         <div class="payment-row" style="border-top: 1px solid #28a745; padding-top: 8px; margin-top: 8px;">
                             <span class="label">Change/Balance:</span>
-                            <span class="amount">₹{{ number_format($invoice->balance_returned, 2) }}</span>
+                            <span class="amount">Rs. {{ number_format($invoice->balance_returned, 2) }}</span>
                         </div>
                     @endif
                 </div>

@@ -22,9 +22,10 @@ class DashboardController extends Controller
             'transactions_count' => DenominationTransaction::count(),
         ];
 
-        $customers = Customer::with('invoices')->get();
+        // Get fresh data without cache
+        $customers = Customer::with('invoices')->orderBy('created_at', 'desc')->get();
         $products = Product::all();
-        $invoices = Invoice::with(['customer', 'items'])->get();
+        $invoices = Invoice::with(['customer', 'items'])->orderBy('created_at', 'desc')->get();
         $invoiceItems = InvoiceItem::with(['product', 'invoice'])->get();
         $denominations = Denomination::all();
         $transactions = DenominationTransaction::with('invoice')->get();
@@ -42,7 +43,7 @@ class DashboardController extends Controller
 
     public function customers()
     {
-        $customers = Customer::with('invoices')->paginate(20);
+        $customers = Customer::with('invoices')->orderBy('created_at', 'desc')->paginate(20);
         return view('dashboard.customers', compact('customers'));
     }
 
