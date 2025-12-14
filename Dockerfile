@@ -11,20 +11,12 @@ FROM php:8.3-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
     libpq-dev \
     libzip-dev \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    libfreetype6-dev \
     curl \
     git \
     zip \
     unzip \
-    && docker-php-ext-configure gd \
-      --enable-gd \
-      --with-freetype \
-      --with-jpeg \
     && docker-php-ext-install \
     pdo \
     pdo_mysql \
@@ -38,7 +30,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xml \
     curl \
     zip \
-    gd \
     opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
