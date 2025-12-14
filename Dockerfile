@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     libzip-dev \
     libpng-dev \
-    libjpeg62-turbo-dev \
+    libjpeg-turbo-dev \
     libfreetype6-dev \
     curl \
     git \
