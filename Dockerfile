@@ -35,12 +35,11 @@ RUN chown -R www-data:www-data /app && \
     chmod -R 755 /app && \
     chmod -R 775 /app/storage /app/bootstrap/cache
 
-# Setup .env
+# Setup .env and run migrations
 RUN if [ ! -f .env ]; then cp .env.example .env; fi && \
     php artisan key:generate --force || true && \
-    touch database/database.sqlite && \
-    php artisan migrate --force || true && \
-    php artisan db:seed --force || true
+    php artisan migrate --force 2>&1 || true && \
+    php artisan db:seed --force 2>&1 || true
 
 EXPOSE 3000
 
