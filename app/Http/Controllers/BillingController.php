@@ -105,7 +105,13 @@ class BillingController extends Controller
             // Try using Barryvdh PDF
             try {
                 $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('billing.pdf', ['invoice' => $invoice]);
-                return $pdf->download('invoice-' . $invoice->invoice_number . '.pdf');
+                
+                // Generate PDF and force download with secure headers
+                return $pdf->download('invoice-' . $invoice->invoice_number . '.pdf')
+                    ->header('X-Content-Type-Options', 'nosniff')
+                    ->header('X-Frame-Options', 'DENY')
+                    ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+                    ->header('Pragma', 'no-cache');
             } catch (\Exception $pdfError) {
                 // Fallback: Generate HTML invoice for download
                 \Log::warning('PDF generation failed, using HTML fallback: ' . $pdfError->getMessage());
@@ -114,7 +120,9 @@ class BillingController extends Controller
                 
                 return response($html)
                     ->header('Content-Type', 'text/html; charset=utf-8')
-                    ->header('Content-Disposition', 'attachment; filename="invoice-' . $invoice->invoice_number . '.html"');
+                    ->header('Content-Disposition', 'attachment; filename="invoice-' . $invoice->invoice_number . '.html"')
+                    ->header('X-Content-Type-Options', 'nosniff')
+                    ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
             }
         } catch (\Exception $e) {
             \Log::error('Invoice download error: ' . $e->getMessage());
