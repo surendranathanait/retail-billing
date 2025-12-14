@@ -37,7 +37,9 @@ RUN chown -R www-data:www-data /app && \
 
 # Setup .env
 RUN if [ ! -f .env ]; then cp .env.example .env; fi && \
-    php artisan key:generate --force || true
+    php artisan key:generate --force || true && \
+    touch database/database.sqlite && \
+    php artisan migrate --force || true
 
 EXPOSE 3000
 
