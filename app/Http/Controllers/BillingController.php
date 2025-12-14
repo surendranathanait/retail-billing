@@ -27,13 +27,23 @@ class BillingController extends Controller
     public function getCustomerByEmail(Request $request)
     {
         $email = $request->query('email');
+        
+        // Search in database - fresh query
         $customer = Customer::where('email', $email)->first();
 
         if ($customer) {
-            return response()->json(['success' => true, 'customer' => $customer]);
+            return response()->json([
+                'success' => true,
+                'customer' => [
+                    'id' => $customer->id,
+                    'name' => $customer->name,
+                    'email' => $customer->email,
+                    'phone' => $customer->phone ?? '',
+                ]
+            ]);
         }
 
-        return response()->json(['success' => false]);
+        return response()->json(['success' => false, 'message' => 'Customer not found']);
     }
 
     /**
@@ -51,11 +61,15 @@ class BillingController extends Controller
         ]);
 
         try {
-            // Get or create customer
+            // Get or create customer with fresh data
             $customer = Customer::firstOrCreate(
                 ['email' => $validated['email']],
                 ['name' => $validated['name']]
             );
+
+            // Always update customer name (in case they provided updated info)
+            $customer->update(['name' => $validated['name']]);
+            $customer->refresh(); // Refresh to get latest data
 
             // Generate invoice
             $invoice = $this->billingService->generateInvoice(
@@ -66,6 +80,7 @@ class BillingController extends Controller
 
             return redirect()->route('billing.display', ['invoice' => $invoice->id]);
         } catch (\Exception $e) {
+            \Log::error('Bill Generation Error: ' . $e->getMessage());
             return back()->with('error', $e->getMessage());
         }
     }
@@ -84,10 +99,21 @@ class BillingController extends Controller
      */
     public function downloadPdf(Invoice $invoice)
     {
-        $invoice->load(['customer', 'items.product']);
-        
-        $pdf = \PDF::loadView('billing.pdf', compact('invoice'));
-        return $pdf->download('invoice-' . $invoice->invoice_number . '.pdf');
+        try {
+            $invoice->load(['customer', 'items.product']);
+            
+            // Generate PDF with proper options
+            $pdf = \PDF::loadView('billing.pdf', compact('invoice'))
+                ->setPaper('a4')
+                ->setOption('isHtml5ParserEnabled', true)
+                ->setOption('enable_remote', true)
+                ->setOption('allow_url_fopen', true);
+            
+            return $pdf->download('invoice-' . $invoice->invoice_number . '.pdf');
+        } catch (\Exception $e) {
+            \Log::error('PDF Generation Error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to generate PDF. Please try again.');
+        }
     }
 
     /**
