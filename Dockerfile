@@ -39,6 +39,6 @@ RUN chown -R www-data:www-data /app && \
 RUN if [ ! -f .env ]; then cp .env.example .env; fi && \
     php artisan key:generate --force || true
 
-EXPOSE 9000
+EXPOSE 3000
 
-CMD ["php-fpm"]
+CMD ["php", "-S", "0.0.0.0:3000", "-t", "public"]
