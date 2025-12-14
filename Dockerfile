@@ -15,21 +15,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     libzip-dev \
     libpng-dev \
-    libjpeg-dev \
+    libjpeg62-turbo-dev \
     libfreetype6-dev \
-    libwebp-dev \
     curl \
     git \
     zip \
     unzip \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install PHP extensions
-RUN docker-php-ext-configure gd \
+    && docker-php-ext-configure gd \
+      --enable-gd \
       --with-freetype \
       --with-jpeg \
-      --with-webp && \
-    docker-php-ext-install \
+    && docker-php-ext-install \
     pdo \
     pdo_mysql \
     pdo_pgsql \
@@ -43,7 +39,8 @@ RUN docker-php-ext-configure gd \
     curl \
     zip \
     gd \
-    opcache
+    opcache \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
