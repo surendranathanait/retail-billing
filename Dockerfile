@@ -15,6 +15,8 @@ RUN apt-get update --allow-insecure-repositories && \
     git \
     zip \
     unzip \
+    nginx \
+    supervisor \
     && docker-php-ext-install pdo pdo_mysql bcmath && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -43,8 +45,19 @@ RUN chown -R www-data:www-data /app && \
 RUN if [ ! -f .env ]; then cp .env.example .env; fi && \
     php artisan key:generate --force || true
 
-# Expose port
-EXPOSE 9000
+# Configure Nginx
+RUN mkdir -p /var/log/supervisor && \
+    rm -f /etc/nginx/sites-enabled/default
 
-# Start PHP-FPM
-CMD ["php-fpm"]
+COPY docker/nginx/conf.d/app.conf /etc/nginx/sites-available/app
+RUN ln -s /etc/nginx/sites-available/app /etc/nginx/sites-enabled/app
+
+# Configure Supervisor to run both Nginx and PHP-FPM
+RUN mkdir -p /etc/supervisor/conf.d && \
+    echo '[supervisord]\nnodaemon=true\n\n[program:php-fpm]\ncommand=/usr/local/sbin/php-fpm\nautostart=true\nautorestart=true\n\n[program:nginx]\ncommand=/usr/sbin/nginx -g "daemon off;"\nautostart=true\nautorestart=true' > /etc/supervisor/conf.d/app.conf
+
+# Expose HTTP port
+EXPOSE 80 9000
+
+# Start services with supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
