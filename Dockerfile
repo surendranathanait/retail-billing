@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-alpine AS frontend-builder
+FROM node:18 AS frontend-builder
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install
@@ -7,26 +7,22 @@ COPY . .
 RUN npm run build
 
 # PHP stage
-FROM php:8.3-fpm-alpine
+FROM php:8.3-fpm
 
 # Install system dependencies
-RUN apk add --no-cache \
-    gcc \
-    g++ \
-    make \
-    curl \
-    sqlite \
-    postgresql-client \
-    mysql-client \
-    zip \
-    unzip \
-    git \
-    oniguruma-dev \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
     libzip-dev \
     libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    libwebp-dev
+    libjpeg-dev \
+    libfreetype6-dev \
+    libwebp-dev \
+    curl \
+    git \
+    zip \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd \
@@ -37,7 +33,6 @@ RUN docker-php-ext-configure gd \
     pdo \
     pdo_mysql \
     pdo_pgsql \
-    pdo_sqlite \
     bcmath \
     ctype \
     fileinfo \
